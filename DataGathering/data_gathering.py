@@ -51,13 +51,18 @@ def get_access_token(client_id, client_secret):
 
 ## Requests tweets with the Search API, returns a parsed json with the entire dump
 ## Example object returned: {statuses: [ ...tweets ], search_metadata: { ...metadata }}
-## Max 100 tweets per request, can be paginated w/ proper adjustments
-def get_search_results(query, count, token):
+## Max 100 tweets per request
+def get_search_results_paged(query, count, max_id, token):
 
+    params={ "q": query, "count": count, "lang": "en" }
+
+    if max_id > 0:
+        params["max_id"] = max_id
+    
     try:
         response = requests.get(
             url="https://api.twitter.com/1.1/search/tweets.json",
-            params={ "q": query, "count": count },
+            params=params,
             headers={ "Authorization": "Bearer {}".format(token) },
         )
         if response.status_code != 200:
@@ -68,6 +73,29 @@ def get_search_results(query, count, token):
     except requests.exceptions.RequestException:
         print('HTTP Request failed')
         return {}
+
+
+## Calls get_search_results_paged as many times as needed to get the specified amount of tweets
+## Example object returned: [ ...tweets ]
+## Max 450 calls / 15m window (i.e. 450'000 tweets / 15m)
+def get_search_results(query, count, token):
+    res = []
+    tot = 0
+    max_id = -1
+    while tot < count:
+        rem = count-tot
+        print("Pulling {} tweets...".format(min(rem, 100)))
+        page = get_search_results_paged(query, min(rem, 100), max_id, token)
+        if page == {}:
+            print('An error has occurred! Returning partial results')
+            break
+        tweets = page["statuses"]
+        last_tweet = tweets[len(tweets)-1]
+        max_id = last_tweet["id"]-1
+        tot += len(tweets)
+        res += tweets
+        print("{}/{} tweets pulled".format(tot, count))
+    return res
 
 
 ## Filters out some garbage from a given set of tweets
@@ -86,7 +114,9 @@ def reformat_tweets(tweets):
 
 # Some tests
 # token = "AAAAAAAAAAAAAAAAAAAAAPY62gAAAAAAUGA8nJomXvOni%2FXpNNuvZhtgAMg%3DvtffumSGrVK3snSkAsWWIlyxNuL30DsaSM3yygdZOvZaYlqCc7"
-# results = get_search_results("las vegas", 10, token)
-# results = reformat_tweets(results["statuses"])
+# results = get_search_results("las vegas", 1230, token)
+# results = reformat_tweets(results)
 # print('Results: {}'.format(results))
-# print(get_access_token("", ""))
+# for t in results:
+#     print(t["text"])
+# print("Total of {} tweets pulled".format(len(results)))
