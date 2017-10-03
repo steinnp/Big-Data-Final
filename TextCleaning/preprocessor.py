@@ -19,15 +19,17 @@ class Preprocessor:
         words = [stemmer.stem(w) for w in words if not w in stopwords.words("english")]
         return " ".join(words)
 
-    def __init__(self, content):
+    def __init__(self):
         self.__vectorizer = TfidfVectorizer(stop_words = stopwords.words('english'), preprocessor = self.__parse_review)
-        self.__transformedValues = self.__vectorizer.fit_transform(content)
 
     def get_vocabulary(self):
         return self.__vectorizer.vocabulary_
 
     def get_transformed_values(self):
         return self.__transformedValues
+
+    def fit_transform(self, content):
+        return self.__vectorizer.fit_transform(content)
 
     def transform(self, content):
         return self.__vectorizer.transform(content)
