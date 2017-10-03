@@ -51,10 +51,10 @@ def get_access_token(client_id, client_secret):
 
 ## Requests tweets with the Search API, returns a parsed json with the entire dump
 ## Example object returned: {statuses: [ ...tweets ], search_metadata: { ...metadata }}
-## Max 100 tweets per request
+## Max 100 tweets per request, use get_search_results()
 def get_search_results_paged(query, count, max_id, token):
 
-    params={ "q": query, "count": count, "lang": "en" }
+    params={ "q": query, "count": count, "lang": "en", "tweet_mode": "extended" }
 
     if max_id > 0:
         params["max_id"] = max_id
@@ -98,12 +98,12 @@ def get_search_results(query, count, token):
     return res
 
 
-## Filters out some garbage from a given set of tweets
+## Returns a copy filtering out some garbage from a given set of tweets
 def reformat_tweets(tweets):
     result = []
     for t in tweets:
         result.append({
-            "text": t["text"],
+            "full_text": t["full_text"],
             "retweet_count": t["retweet_count"],
             "favorite_count": t["favorite_count"],
             "id": t["id_str"],
@@ -112,11 +112,24 @@ def reformat_tweets(tweets):
     return result
 
 
-# Some tests
-# token = "AAAAAAAAAAAAAAAAAAAAAPY62gAAAAAAUGA8nJomXvOni%2FXpNNuvZhtgAMg%3DvtffumSGrVK3snSkAsWWIlyxNuL30DsaSM3yygdZOvZaYlqCc7"
-# results = get_search_results("las vegas", 1230, token)
-# results = reformat_tweets(results)
-# print('Results: {}'.format(results))
-# for t in results:
-#     print(t["text"])
-# print("Total of {} tweets pulled".format(len(results)))
+## Converts (in-place) retweets in regular tweets
+def convert_retweets(tweets):
+    for i in range(0, len(tweets)):
+        if "retweeted_status" in tweets[i]:
+            tweets[i] = tweets[i]["retweeted_status"]
+
+
+## Strips out (in-place) urls from full tweets
+def strip_urls(full_tweets):
+    for t in full_tweets:
+        urls = []
+        if "urls" in t["entities"]:
+            for u in t["entities"]["urls"]:
+                urls.append(u["url"])
+        if "media" in t["entities"]:
+            for m in t["entities"]["media"]:
+                urls.append(m["url"])
+        full_text = t["full_text"]
+        for u in urls:
+            full_text = full_text.replace(u, "")
+        t["full_text"] = full_text
