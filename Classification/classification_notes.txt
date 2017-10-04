@@ -1,0 +1,38 @@
+Single layer FFNN:
+Validation score on 80/20 split
+          0       0.66      0.64      0.65       233
+          1       0.32      0.29      0.30       182
+          2       0.72      0.76      0.74       425
+
+avg / total       0.62      0.63      0.62       840
+Training score was 99.3.
+
+
+Next step: Add layers and add notes:
+Adding layers and nodes did not increase the val score.
+results :
+
+             precision    recall  f1-score   support
+
+          0       0.65      0.61      0.63       214
+          1       0.29      0.29      0.29       161
+          2       0.74      0.76      0.75       465
+
+avg / total       0.63      0.63      0.63       840
+
+That might mean that we are overfitting.
+
+Next step: Add dropout.
+First Added dropout to relatively simple network(one hidden layer, 16 nodes)
+             precision    recall  f1-score   support
+
+          0       0.68      0.73      0.71       208
+          1       0.38      0.37      0.38       164
+          2       0.79      0.78      0.78       468
+
+avg / total       0.69      0.69      0.69       840
+
+Looking good. Lets try a more complex model with dropout:
+
+
+

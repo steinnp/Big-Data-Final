@@ -1,6 +1,7 @@
 import sys
 import random
 import os
+import numpy as np
 sys.path.insert(0, '../TextCleaning/')
 from TextCleaning.preprocessor import Preprocessor
 from pprint import pprint
@@ -57,12 +58,20 @@ class TrainingData:
                 all_ratings.append([0, 1, 0])
         return all_ratings
 
-
     def get_file_lines(self, filepath):
         fn = os.path.join(os.path.dirname(__file__), filepath)
         with open(fn, 'r', encoding='utf-8') as train_file:
             lines = train_file.read().splitlines()
         return lines
+
+    def matrix_to_dense(self, reviews):
+        """
+        Changes a sparse matrix of multiple reviews
+        to numpy arrays for each review
+        :param reviews:
+        :return:
+        """
+        return np.array([np.array(tr.todense()) for tr in reviews])
 
 '''
 training = TrainingData()
