@@ -20,7 +20,7 @@ class Preprocessor:
         return " ".join(words)
 
     def __init__(self):
-        self.__vectorizer = TfidfVectorizer(stop_words = stopwords.words('english'), preprocessor = self.__parse_review)
+        self.__vectorizer = TfidfVectorizer(stop_words = stopwords.words('english'), preprocessor = self.__parse_review, norm = 'l2')
 
     def get_vocabulary(self):
         return self.__vectorizer.vocabulary_
