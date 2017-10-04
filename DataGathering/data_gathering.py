@@ -12,6 +12,7 @@
 import requests
 import json
 import base64
+import csv
 
 ##
 ## README
@@ -52,12 +53,14 @@ def get_access_token(client_id, client_secret):
 ## Requests tweets with the Search API, returns a parsed json with the entire dump
 ## Example object returned: {statuses: [ ...tweets ], search_metadata: { ...metadata }}
 ## Max 100 tweets per request, use get_search_results()
-def get_search_results_paged(query, count, max_id, token):
+def get_search_results_paged(query, count, max_id, result_type, token):
 
     params={ "q": query, "count": count, "lang": "en", "tweet_mode": "extended" }
 
-    if max_id > 0:
+    if max_id is not None:
         params["max_id"] = max_id
+    if result_type is not None:
+        params["result_type"] = result_type
     
     try:
         response = requests.get(
@@ -78,14 +81,15 @@ def get_search_results_paged(query, count, max_id, token):
 ## Calls get_search_results_paged as many times as needed to get the specified amount of tweets
 ## Example object returned: [ ...tweets ]
 ## Max 450 calls / 15m window (i.e. 450'000 tweets / 15m)
-def get_search_results(query, count, token):
+## Param result_type may be "mixed", "recent", or "popular"
+def get_search_results(query, count, result_type, token):
     res = []
     tot = 0
-    max_id = -1
+    max_id = None
     while tot < count:
         rem = count-tot
         print("Pulling {} tweets...".format(min(rem, 100)))
-        page = get_search_results_paged(query, min(rem, 100), max_id, token)
+        page = get_search_results_paged(query, min(rem, 100), max_id, result_type, token)
         if page == {}:
             print('An error has occurred! Returning partial results')
             break
@@ -133,3 +137,17 @@ def strip_urls(full_tweets):
         for u in urls:
             full_text = full_text.replace(u, "")
         t["full_text"] = full_text
+
+
+## Tweets to CSV
+def tweets_to_csv(tweets, file_path):
+    with open(file_path, 'w') as csvfile:
+        writer = csv.writer(
+            csvfile,
+            delimiter=',',
+            quotechar='"',
+            quoting=csv.QUOTE_MINIMAL
+        )
+        writer.writerow(["id", "full_text", "retweet_count", "favorite_count"])
+        for t in tweets:
+            writer.writerow([t["id"], t["full_text"], t["retweet_count"], t["favorite_count"]])
