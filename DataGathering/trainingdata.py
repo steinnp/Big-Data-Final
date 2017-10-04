@@ -58,6 +58,31 @@ class TrainingData:
                 all_ratings.append([0, 1, 0])
         return all_ratings
 
+    @staticmethod
+    def tweets_to_amazon_ratings(ratings):
+        """
+        Changes the ratings from continous values to an One-Hot array
+        [1, 0, 0, 0, 0] = Very Negative
+        [0, 1, 0, 0, 0] = Moderately Negative
+        [0, 0, 1, 0, 0] = Neutral
+        [0, 0, 0, 1, 0] = Moderately Positive
+        [0, 0, 0, 0, 1] = Very Positive
+        :return:
+        """
+        all_ratings = []
+        for rating in ratings:
+            if rating > 2.4:
+                all_ratings.append([0, 0, 0, 0, 1])
+            elif rating > 0.8:
+                all_ratings.append([0, 0, 0, 1, 0])
+            elif rating > -0.8:
+                all_ratings.append([0, 0, 1, 0, 0])
+            elif rating > -2.4:
+                all_ratings.append([0, 1, 0, 0, 0])
+            else:
+                all_ratings.append([1, 0, 0, 0, 0])
+        return all_ratings
+
     def get_file_lines(self, filepath):
         fn = os.path.join(os.path.dirname(__file__), filepath)
         with open(fn, 'r', encoding='utf-8') as train_file:
