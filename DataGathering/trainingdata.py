@@ -38,9 +38,27 @@ class TrainingData:
     def get_training_validation_data(self, split):
         return self.split_training_validation(self.inputData, self.outputData, split)
 
+    @staticmethod
+    def discretize_ratings(ratings):
+        """
+        Changes the ratings from continous values to an One-Hot array
+        [1, 0, 0] = Negative
+        [0, 1, 0] = Neutral
+        [0, 0, 1] = Positive
+        :return:
+        """
+        all_ratings = []
+        for rating in ratings:
+            if rating < -0.5:
+                all_ratings.append([1, 0, 0])
+            elif rating > 0.5:
+                all_ratings.append([0, 0, 1])
+            else:
+                all_ratings.append([0, 1, 0])
+        return all_ratings
+
 
     def get_file_lines(self, filepath):
-        lines = []
         fn = os.path.join(os.path.dirname(__file__), filepath)
         with open(fn, 'r', encoding='utf-8') as train_file:
             lines = train_file.read().splitlines()
