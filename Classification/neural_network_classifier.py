@@ -1,10 +1,14 @@
 # from keras.preprocessing.text import Tokenizer
 # from keras.preprocessing.sequence import pad_sequences
 # from keras.utils import to_categorical
+import sys
+sys.path.insert(0, '../DataGathering/')
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
+
 from sklearn.metrics import confusion_matrix, classification_report
-from DataGathering import trainingdata as td
+# from DataGathering import trainingdata as td
+import trainingdata as td
 import numpy as np
 
 
