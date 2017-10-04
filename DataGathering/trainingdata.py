@@ -3,7 +3,7 @@ import random
 import os
 import numpy as np
 sys.path.insert(0, '../TextCleaning/')
-from TextCleaning.preprocessor import Preprocessor
+from preprocessor import Preprocessor
 from pprint import pprint
 
 class TrainingData:

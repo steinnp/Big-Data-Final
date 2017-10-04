@@ -34,5 +34,30 @@ avg / total       0.69      0.69      0.69       840
 
 Looking good. Lets try a more complex model with dropout:
 
+With this(bit more complex) model:
+model = Sequential()
+model.add(Dense(64, input_shape=(len(trainingReviews[0]), )))
+model.add(Dropout(0.7))
+model.add(Dense(32))
+model.add(Dropout(0.7))
+model.add(Dense(16))
+model.add(Dropout(0.7))
+model.add(Dense(len(trainingRatings[0]), activation='softmax'))
+
+    model.compile(optimizer='rmsprop',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    we get:
+                 precision    recall  f1-score   support
+
+          0       0.72      0.73      0.72       220
+          1       0.43      0.33      0.37       162
+          2       0.80      0.87      0.84       458
+
+avg / total       0.71      0.73      0.72       840
+
+Getting better!
+
 
 
