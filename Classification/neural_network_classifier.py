@@ -15,7 +15,12 @@ import numpy as np
 if __name__ == '__main__':
     training = td.TrainingData()
     training.set_tweet_training_data()
-    trainingReviews, trainingRatings, validationReviews, validationRatings = training.get_training_validation_data(0.8)
+    trainingReviews, trainingRatings, validationReviews, validationRatings, trainingRawInputData, validationRawInputData = training.get_training_validation_data(0.8)
+    '''
+    print(trainingRawInputData[0])
+    print(len(trainingRawInputData))
+    print(validationRawInputData[0])
+    '''
 
     trainingReviews = training.matrix_to_dense(trainingReviews)
     validationReviews = training.matrix_to_dense(validationReviews)
