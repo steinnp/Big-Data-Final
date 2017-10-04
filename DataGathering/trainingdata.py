@@ -1,7 +1,8 @@
 import sys
 import random
+import os
 sys.path.insert(0, '../TextCleaning/')
-from preprocessor import Preprocessor
+from TextCleaning.preprocessor import Preprocessor
 from pprint import pprint
 
 class TrainingData:
@@ -40,7 +41,8 @@ class TrainingData:
 
     def get_file_lines(self, filepath):
         lines = []
-        with open(filepath, 'r', encoding='utf-8') as train_file:
+        fn = os.path.join(os.path.dirname(__file__), filepath)
+        with open(fn, 'r', encoding='utf-8') as train_file:
             lines = train_file.read().splitlines()
         return lines
 
