@@ -1,8 +1,7 @@
-import sys
-sys.path.insert(0, '../DataGathering/')
-from classification_utilities import load_keras_model, save_keras_model, classify_trump_tweets
-import trainingdata as td
+import DataGathering.trainingdata as td
+import os, sys
 import numpy as np
+from Classification.classification_utilities import save_keras_model, load_keras_model, classify_trump_tweets
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from sklearn.metrics import confusion_matrix, classification_report, mean_squared_error
@@ -53,13 +52,9 @@ def train_nn():
 
 
 if __name__ == '__main__':
+    # get an absolute path to the directory that contains mypackage
+    foo_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
     train_nn()
-
-
-
-
-
-
-
-
-
