@@ -1,9 +1,14 @@
-import sys
+if __name__ == '__main__':
+    import os, sys
+    # get an absolute path to the directory that contains mypackage
+    foo_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
 import random
 import os
 import numpy as np
-sys.path.insert(0, '../TextCleaning/')
-from preprocessor import Preprocessor
+from TextCleaning.preprocessor import Preprocessor
 from pprint import pprint
 
 class TrainingData:

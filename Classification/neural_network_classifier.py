@@ -1,6 +1,14 @@
+if __name__ == '__main__':
+    import os, sys
+    # get an absolute path to the directory that contains mypackage
+    foo_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
+    sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
+
 import sys
-sys.path.insert(0, '../DataGathering/')
-import trainingdata as td
+# sys.path.insert(0, '../DataGathering/')
+import datagathering.trainingdata as td
 import numpy as np
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
