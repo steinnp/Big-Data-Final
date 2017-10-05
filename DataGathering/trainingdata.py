@@ -18,26 +18,29 @@ class TrainingData:
         lines = self.get_file_lines('tweets_GroundTruth.txt')
         lines = [l.split('\t') for l in lines]
         outputData, inputData = zip(*[(float(l[1]), l[2]) for l in lines])
+        self.rawInputData = inputData
         inputData = self.__preprocessor.fit_transform(inputData)
         self.inputData = inputData
         self.outputData = outputData
 
     def get_training_data(self):
-        return self.inputData, self.outputData
+        return self.inputData, self.outputData, self.rawInputData
 
-    def split_training_validation(self, inputData, outputData, split):
-        zipped = list(zip(inputData, outputData))
+    def split_training_validation(self, rawInputData, inputData, outputData, split):
+        zipped = list(zip(rawInputData, inputData, outputData))
         self.rand.shuffle(zipped)
-        inputData, outputData = list(zip(*zipped))
+        rawInputData, inputData, outputData = list(zip(*zipped))
         split = int(split * len(inputData))
+        trainingRawInputData = rawInputData[:split]
         trainingInputData = inputData[:split]
         trainingOutputData = outputData[:split]
+        validationRawInputData = rawInputData[split:]
         validationInputData = inputData[split:]
         validationOutputData = outputData[split:]
-        return trainingInputData, trainingOutputData, validationInputData, validationOutputData
+        return trainingInputData, trainingOutputData, validationInputData, validationOutputData, trainingRawInputData, validationRawInputData
 
     def get_training_validation_data(self, split):
-        return self.split_training_validation(self.inputData, self.outputData, split)
+        return self.split_training_validation(self.rawInputData, self.inputData, self.outputData, split)
 
     @staticmethod
     def discretize_ratings(ratings):
