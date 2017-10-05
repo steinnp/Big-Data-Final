@@ -53,9 +53,9 @@ class TrainingData:
         """
         all_ratings = []
         for rating in ratings:
-            if rating < -0.5:
+            if rating < -1.0:
                 all_ratings.append([1, 0, 0])
-            elif rating > 0.5:
+            elif rating > 1.:
                 all_ratings.append([0, 0, 1])
             else:
                 all_ratings.append([0, 1, 0])
