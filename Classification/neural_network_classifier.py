@@ -1,7 +1,7 @@
 import DataGathering.trainingdata as td
 import os, sys
 import numpy as np
-from Classification.classification_utilities import save_keras_model, load_keras_model, classify_trump_tweets
+from Classification.classification_utilities import save_keras_model, load_keras_model, classify_trump_tweets, classify_trump_tweets_one_at_a_time
 from keras.layers import Dense, Dropout
 from keras.models import Sequential
 from sklearn.metrics import confusion_matrix, classification_report, mean_squared_error
@@ -16,7 +16,7 @@ def build_ffnn_model(inp_shape):
     model.add(Dropout(0.5))
     model.add(Dense(32, activation='sigmoid'))
     model.add(Dropout(0.5))
-    # model.add(Dense(len(trainingRatings[0])ax'))
+    # model.add(Dense(len(trainingRatings[0])))
     model.add(Dense(1))
 
     model.compile(optimizer='rmsprop',
@@ -57,4 +57,8 @@ if __name__ == '__main__':
     sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
     sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
     sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
-    train_nn()
+    model = load_keras_model('FFNN-Regression.h5')
+    classify_trump_tweets_one_at_a_time(model, '480k_trump.csv',
+                                        results_to_file=True,
+                                        results_file_name="480ktrump_results.csv")
+    # train_nn()
