@@ -1,3 +1,9 @@
+import sys, os
+foo_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
+sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
+sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
+sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
+sys.path.insert(0, '../DataGathering/')
 import DataGathering.trainingdata as td
 import os, sys
 import numpy as np
@@ -28,11 +34,12 @@ def build_ffnn_model(inp_shape):
 
 def train_nn():
     training = td.TrainingData()
-    training.set_tweet_training_data()
+    #training.set_tweet_training_data()
+    training.set_amazon_training_data()
     trainingReviews, trainingRatings, validationReviews, validationRatings, train_raw, val_raw = training.get_training_validation_data(0.8)
 
-    trainingReviews = training.matrix_to_dense(trainingReviews)
-    validationReviews = training.matrix_to_dense(validationReviews)
+    #trainingReviews = training.matrix_to_dense(trainingReviews)
+    #validationReviews = training.matrix_to_dense(validationReviews)
 
     trainingReviews = np.reshape(trainingReviews, (len(trainingReviews), trainingReviews.shape[2]))
     validationReviews = np.reshape(validationReviews, (len(validationReviews), validationReviews.shape[2]))
