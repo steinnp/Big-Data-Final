@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 ##
 ## DM2583 Big Data in Media Technology
 ## Final project
@@ -80,12 +81,11 @@ def get_search_results_paged(query, count, max_id, result_type, token):
 
 ## Calls get_search_results_paged as many times as needed to get the specified amount of tweets
 ## Example object returned: [ ...tweets ]
-## Max 450 calls / 15m window (i.e. 450'000 tweets / 15m)
+## Max 450 calls / 15m window (i.e. 45'000 tweets / 15m)
 ## Param result_type may be "mixed", "recent", or "popular"
-def get_search_results(query, count, result_type, token):
+def get_search_results(query, count, result_type, token, max_id = None):
     res = []
     tot = 0
-    max_id = None
     while tot < count:
         rem = count-tot
         print("Pulling {} tweets...".format(min(rem, 100)))
@@ -94,6 +94,9 @@ def get_search_results(query, count, result_type, token):
             print('An error has occurred! Returning partial results')
             break
         tweets = page["statuses"]
+        if len(tweets) == 0:
+            print('No more tweets for the given query! Returning data collected up to now')
+            break
         last_tweet = tweets[len(tweets)-1]
         max_id = last_tweet["id"]-1
         tot += len(tweets)
@@ -141,13 +144,13 @@ def strip_urls(full_tweets):
 
 ## Tweets to CSV
 def tweets_to_csv(tweets, file_path):
-    with open(file_path, 'w') as csvfile:
+    with open(file_path, 'w+', encoding='utf-8') as csvfile:
         writer = csv.writer(
             csvfile,
             delimiter=',',
             quotechar='"',
             quoting=csv.QUOTE_MINIMAL
         )
-        writer.writerow(["id", "full_text", "retweet_count", "favorite_count"])
+        writer.writerow(["id", "full_text", "retweet_count", "favorite_count", "location", "lang", "date"])
         for t in tweets:
-            writer.writerow([t["id"], t["full_text"], t["retweet_count"], t["favorite_count"]])
+            writer.writerow([t["id"], t["full_text"], t["retweet_count"], t["favorite_count"], t["user"]["location"], t["lang"], t["created_at"]])
