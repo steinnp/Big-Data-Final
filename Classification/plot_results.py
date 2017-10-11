@@ -30,7 +30,7 @@ def plot_raw_classification(csv_file_path):
 
 
 
-def plot_histogram(values, bars, xlabel, ylabel):
+def plot_histogram_old(values, bars, xlabel, ylabel):
 
 	fig, ax = plt.subplots()
 	n, bins = np.histogram(values, bars)
@@ -69,6 +69,27 @@ def plot_histogram(values, bars, xlabel, ylabel):
 
 	plt.xlabel(xlabel)
 	plt.ylabel(ylabel)
+	plt.show()
+
+
+def plot_histogram(values, bars, xlabel, ylabel):
+
+	occurrences = [0,0,0]
+	for v in values:
+		occurrences[v] += 1
+	
+	fig, ax = plt.subplots()
+	colors = ['red', 'yellow', 'green']
+	labels = ['Negative', 'Neutral', 'Positive']
+
+	labels_range = [i for i in range(len(labels))]
+
+	ax.barh(labels_range, occurrences, align='center', color=colors)
+	ax.set_yticks(labels_range)
+	ax.set_yticklabels(labels)
+	ax.set_xlabel('Tweets')
+
+	plt.title("Classification")
 	plt.show()
 
 

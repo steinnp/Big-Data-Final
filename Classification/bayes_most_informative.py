@@ -95,4 +95,4 @@ def plot_most_important_words(tweets, predicts):
     ax.set_xlabel('Word impact')
 
     plt.title("Most informative features")
-    plt.show()
+    #plt.show()
