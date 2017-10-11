@@ -42,12 +42,12 @@ def get_access_token(client_id, client_secret):
             data={ "grant_type": "client_credentials" },
         )
         if response.status_code != 200:
-            print('Response HTTP Status Code: {}'.format(response.status_code))
+            print('Response HTTP Status Code: {}'.format(response.status_code), flush=True)
             return response.content
         else:
             return json.loads(response.content)["access_token"]
     except requests.exceptions.RequestException:
-        print('HTTP Request failed')
+        print('HTTP Request failed', flush=True)
         return ""
 
 
@@ -70,12 +70,12 @@ def get_search_results_paged(query, count, max_id, result_type, token):
             headers={ "Authorization": "Bearer {}".format(token) },
         )
         if response.status_code != 200:
-            print('Response HTTP Status Code: {}'.format(response.status_code))
+            print('Response HTTP Status Code: {}'.format(response.status_code), flush=True)
             return {}
         else:
             return json.loads(response.content)
     except requests.exceptions.RequestException:
-        print('HTTP Request failed')
+        print('HTTP Request failed', flush=True)
         return {}
 
 
@@ -88,20 +88,20 @@ def get_search_results(query, count, result_type, token, max_id = None):
     tot = 0
     while tot < count:
         rem = count-tot
-        print("Pulling {} tweets...".format(min(rem, 100)))
+        print("Pulling {} tweets...".format(min(rem, 100)), flush=True)
         page = get_search_results_paged(query, min(rem, 100), max_id, result_type, token)
         if page == {}:
-            print('An error has occurred! Returning partial results')
+            print('An error has occurred! Returning partial results', flush=True)
             break
         tweets = page["statuses"]
         if len(tweets) == 0:
-            print('No more tweets for the given query! Returning data collected up to now')
+            print('No more tweets for the given query! Returning data collected up to now', flush=True)
             break
         last_tweet = tweets[len(tweets)-1]
         max_id = last_tweet["id"]-1
         tot += len(tweets)
         res += tweets
-        print("{}/{} tweets pulled".format(tot, count))
+        print("{}/{} tweets pulled".format(tot, count), flush=True)
     return res
 
 

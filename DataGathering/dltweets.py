@@ -36,6 +36,7 @@ parser.add_argument('-k', '--token',  help='access token for Twitter', default=D
 parser.add_argument('-c', '--count',  help='number of tweets to download', default=DEF_N_TWEETS, type=int)
 parser.add_argument('-s', '--fcount', help='number of files to save the results', default=DEF_N_FILES, type=int)
 parser.add_argument('-t', '--type',   help='type of tweets to download', choices=['mixed', 'recent', 'popular'], default=DEF_TWEETS_TYPE)
+parser.add_argument('--besteffort',   help='stops if there are no more tweets available', action="store_true")
 args = parser.parse_args()
 
 output_folder = args.dest
@@ -45,6 +46,7 @@ n_tweets = args.count
 n_files = args.fcount
 tweets_type = args.type
 token = args.token
+besteffort = args.besteffort
 
 tweets_per_file = int(n_tweets / n_files)
 n_downloaded = 0
@@ -52,6 +54,7 @@ n_remaining = n_tweets
 n_remaining_curr_file = tweets_per_file
 results = []
 max_id = None
+besteffort_halt = False
 i = 0
 
 while i < n_files:
@@ -66,9 +69,13 @@ while i < n_files:
 		n_remaining_curr_file -= len(results)
 
 	if len(results) < tweets_per_file:
-		print("Retrying in {} seconds...".format(sleep_time))
-		sleep(sleep_time)
-		continue
+		if besteffort:
+			print("Halting at best effort.", flush=True)
+			besteffort_halt = True
+		else:
+			print("Retrying in {} seconds...".format(sleep_time), flush=True)
+			sleep(sleep_time)
+			continue
 
 	convert_retweets(results)
 	strip_urls(results)
@@ -87,4 +94,7 @@ while i < n_files:
 	results = []
 	n_remaining_curr_file = tweets_per_file
 
-print("done")
+	if besteffort_halt:
+		break
+
+print("done", flush=True)

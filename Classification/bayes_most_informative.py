@@ -2,6 +2,7 @@ import nltk
 import csv
 import matplotlib.pyplot as plt
 
+word_features = []
 
 def get_words_in_tweets(tweets):
     all_words = []
@@ -19,6 +20,7 @@ def get_word_features(wordlist):
 def extract_features(document):
     document_words = set(document)
     features = {}
+    global word_features
     for word in word_features:
         features[word] = (word in document_words)
     return features
@@ -50,24 +52,25 @@ def get_most_informative_features_with_values(clf, n=100):
     return to_return
 
 
-if __name__ == '__main__':
-    tweet_texts = []
-    with open('480k_trump.csv', 'r', encoding='utf-8') as csvfile:
-        csv_reader = csv.reader(csvfile, delimiter=',')
-        count = 0
-        for row in csv_reader:
-            tweet_texts.append(row[1])
-            count += 1
-            if count == 200:
-                break
-    del tweet_texts[0]
-    labels = ['pos' for _ in range(100)] + ['neg' for _ in range(100)]
-    train = list(zip(tweet_texts, labels))
-    tweets = []
+def plot_most_important_words(tweets, predicts):
+    labels = []
+    new_tweets = []
+    for i, la in enumerate(predicts):
+        if la == 0:
+            new_tweets.append(tweets[i])
+            labels.append('neg')
+        if la == 1:
+            pass
+        if la == 2:
+            new_tweets.append(tweets[i])
+            labels.append('pos')
 
+    train = list(zip(new_tweets, labels))
+    tweets = []
     for (words, sentiment) in train:
         words_filtered = [e.lower() for e in words.split() if len(e) >= 3]
         tweets.append((words_filtered, sentiment))
+    global word_features
     word_features = get_word_features(get_words_in_tweets(tweets))
 
     training_set = nltk.classify.apply_features(extract_features, tweets)
