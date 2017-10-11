@@ -9,14 +9,12 @@ sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..'))
 import pandas as pd
 import DataGathering.trainingdata as td
 from nltk.corpus import stopwords
+import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.cross_validation import train_test_split
 from sklearn import naive_bayes
-from sklearn.metrics import roc_auc_score
-
-
-
-
+from sklearn.metrics import roc_auc_score, classification_report
+from sklearn.naive_bayes import GaussianNB
 from sklearn import linear_model                                                                                                                                              
 from sklearn import datasets                                                                                                                                                  
 from sklearn import metrics  
@@ -69,8 +67,4 @@ clf = naive_bayes.BernoulliNB()
 clf.fit(x_train, y_train)
 
 
-#testing our model
-roc_auc_score(y_test, clf.predict_proba(x_test)[:, 1])
-#another test
-cl.classify("Trump is an amazing!")
 
