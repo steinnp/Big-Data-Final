@@ -2,6 +2,7 @@ import nltk
 import csv
 import matplotlib.pyplot as plt
 
+
 def get_words_in_tweets(tweets):
     all_words = []
     for (words, sentiment) in tweets:
@@ -15,41 +16,71 @@ def get_word_features(wordlist):
     return word_features
 
 
-def extract_features(document, word_features):
+def extract_features(document):
     document_words = set(document)
     features = {}
     for word in word_features:
         features[word] = (word in document_words)
     return features
 
+def get_most_informative_features_with_values(clf, n=100):
+    # Determine the most relevant features, and display them.
+    cpdist = clf._feature_probdist
+    to_return = []
+    print('Most Informative Features')
 
-def plot_most_important_words(tweets, predicts):
-    labels = []
-    for la in labels:
-        if la == 0:
-            labels.append('neg')
-        if la == 1:
-            labels.append('neu')
-        if la == 2:
-            labels.append('pos')
+    for (fname, fval) in clf.most_informative_features(n):
+        def labelprob(l):
+            return cpdist[l, fname].prob(fval)
 
-    train = list(zip(tweets, labels))
+        labels = sorted([l for l in clf._labels
+                         if fval in cpdist[l, fname].samples()],
+                        key=labelprob)
+        if len(labels) == 1:
+            continue
+        l0 = labels[0]
+        l1 = labels[-1]
+        if cpdist[l0, fname].prob(fval) == 0:
+            ratio = 'INF'
+        else:
+            ratio = float((cpdist[l1, fname].prob(fval) / cpdist[l0, fname].prob(fval)))
+        if l0 == 'pos':
+            ratio = ratio * -1
+        to_return.append((fname, ratio))
+    return to_return
+
+
+if __name__ == '__main__':
+    tweet_texts = []
+    with open('480k_trump.csv', 'r', encoding='utf-8') as csvfile:
+        csv_reader = csv.reader(csvfile, delimiter=',')
+        count = 0
+        for row in csv_reader:
+            tweet_texts.append(row[1])
+            count += 1
+            if count == 200:
+                break
+    del tweet_texts[0]
+    labels = ['pos' for _ in range(100)] + ['neg' for _ in range(100)]
+    train = list(zip(tweet_texts, labels))
     tweets = []
 
     for (words, sentiment) in train:
         words_filtered = [e.lower() for e in words.split() if len(e) >= 3]
         tweets.append((words_filtered, sentiment))
-        
     word_features = get_word_features(get_words_in_tweets(tweets))
 
-    training_set = nltk.classify.apply_features(extract_features, tweets, word_features)
+    training_set = nltk.classify.apply_features(extract_features, tweets)
+    # training_set = nltk.classify.apply_features(word_features, tweets)
 
     clf = nltk.NaiveBayesClassifier.train(training_set)
-    mostinf = clf.get_most_informative_features_with_values(20)
+    mostinf = get_most_informative_features_with_values(clf, 20)
+    # mostinf = clf.get_most_informative_features_with_values(20)
     mostinf = sorted(mostinf, key=lambda x: x[1])
     words = [i[0] for i in mostinf]
     values = [i[1] for i in mostinf]
     x_range = [i for i in range(len(words))]
+
 
     fig = plt.figure(facecolor='white')
     ax = fig.add_subplot(1, 1, 1)
