@@ -11,7 +11,8 @@ import DataGathering.trainingdata as td
 import numpy as np
 from keras import optimizers as opt
 from keras.layers import Dense, Embedding, Input, Conv1D, MaxPooling1D, Flatten, Dropout
-from keras.models import Model, Sequential
+from keras.models import Model, Sequential, load_model
+from keras.callbacks import ModelCheckpoint
 from sklearn.metrics import confusion_matrix, classification_report, mean_squared_error, f1_score, accuracy_score
 
 MAX_SEQ_LENGTH = 400
@@ -45,12 +46,10 @@ def get_uniform_distribution(x_data, y_data, chunk_size=1000):
             new_y.append(y_data[i])
     return new_x, new_y
 
-
-
-def get_amazon_data():
+def get_amazon_data_old():
     x_data = open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_x_train_set.txt', 'r').readlines()
     y_data = [float(x.strip()) for x in open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_y_train_set.txt', 'r').readlines()]
-    x_data, y_data = get_uniform_distribution(x_data, y_data, 5000)
+    x_data, y_data = get_uniform_distribution(x_data, y_data, 50000)
     tokenizer = Tokenizer()
     tokenizer.fit_on_texts(x_data)
     sequences = tokenizer.texts_to_sequences(x_data)
@@ -82,9 +81,47 @@ def get_amazon_data():
     y_train = labels[:nb_validation_samples]
     x_test = data[nb_validation_samples:]
     y_test = labels[nb_validation_samples:]
-    return x_train, y_train, x_test, y_test, word_index
+    return x_train, y_train, x_test, y_test, word_index, tokenizer
 
-def build_ffnn_model(inp_shape, output_size):
+def get_amazon_data(tokenizer):
+    x_data = open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_x_train_set.txt', 'r').readlines()
+    y_data = [float(x.strip()) for x in open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_y_train_set.txt', 'r').readlines()]
+    x_data = x_data[1000000:]
+    y_data = y_data[1000000:]
+    sequences = tokenizer.texts_to_sequences(x_data)
+
+    word_index = tokenizer.word_index
+    print('Found %s unique tokens.' % len(word_index))
+
+    data = pad_sequences(sequences, MAX_SEQ_LENGTH)
+
+
+    lol = []
+    for l in y_data:
+        if int(l) == 3:
+            lol.append(1)
+        elif int(l) > 3:
+            lol.append(2)
+        else:
+            lol.append(0)
+    labels = to_categorical(np.asarray(lol))
+    print('Shape of data tensor:', data.shape)
+    print('Shape of label tensor:', labels.shape)
+
+    indices = np.arange(data.shape[0])
+    np.random.shuffle(indices)
+    data = data[indices]
+    labels = labels[indices]
+    nb_validation_samples = int(1 * data.shape[0])
+
+    x_train = data[:nb_validation_samples]
+    y_train = labels[:nb_validation_samples]
+   # x_test = data[nb_validation_samples:]
+   # y_test = labels[nb_validation_samples:]
+    #return x_train, y_train, x_test, y_test, word_index
+    return x_train, y_train, word_index
+
+def build_ffn_model(inp_shape, output_size):
     model = Sequential()
     model.add(Dense(256, input_shape=(inp_shape,), activation='relu'))
     model.add(Dropout(0.1))
@@ -134,6 +171,7 @@ def build_cnn_model(word_index, output_size):
     preds = Dense(output_size, activation='softmax')(x)
 
     model = Model(sequence_input, preds)
+    model.load_weights(r"C:\Users\steinnp\Desktop\KTH\Big-Data\Big-Data-Final\cnn-weights-imporement-00-- 0.74.hdf5")
     rms = opt.RMSprop(lr=0.001)
     model.compile(loss='categorical_crossentropy',
                   optimizer=rms,
@@ -153,34 +191,28 @@ def train_cnn():
     # training_reviews = training.matrix_to_dense(validation_reviews)
     # x_train, x_val, word_index = preprocess_text_for_cnn_keras(train_raw, val_raw)
 
-    x_train, y_train, x_val, y_val, word_index = get_amazon_data()
+    x_train, y_train, x_val, y_val, word_index = get_amazon_data_old()
 
     y_val_max = np.array([np.array(i).argmax(axis=0) for i in y_val])
     y_train_max = np.array([np.array(i).argmax(axis=0) for i in y_train])
 
-    model = build_ffn_model(len(x_train[0]), len(y_train[0]))
+    model = build_cnn_model(word_index, len(y_train[0]))
 
     old_max = 0
     no_update_count = 0
     best_model = 0
+    filepath = "cnn-weights-imporement-{epoch:02d}--{val_acc: .2f}.hdf5"
+    checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=False, mode='max')
+    callback_list = [checkpoint]
     for i in range(200):
         print("NN fold: {}".format(i))
         model.fit(x_train, y_train,
-                  epochs=1, batch_size=64)
+                  epochs=1, batch_size=64, callbacks=callback_list, validation_data=(x_val, y_val))
         yp = model.predict(x_val)
         yp_max = np.array([i.argmax(axis=0) for i in yp])
         print(yp_max[0])
         print(y_val_max[0])
         f1 = f1_score(y_val_max, yp_max, average='weighted')
-        if old_max < f1:
-            best_model = model
-            old_max = f1
-            no_update_count = 0
-        else:
-            no_update_count += 1
-            if no_update_count >= 20:
-                break
-
         print("-----------------VALIDATION RESULTS------------------")
         report = classification_report(y_val_max, yp_max)
         conf = confusion_matrix(y_val_max, yp_max)
@@ -188,7 +220,6 @@ def train_cnn():
         print(report)
         print(conf)
         print(accuracy)
-    best_model.save("amazon_cnn_model.h5")
 '''
         print("-----------------TRAIN RESULTS------------------")
         yp = model.predict(x_train)
@@ -202,7 +233,6 @@ def train_cnn():
         print(conf)
 '''
 
-
 def train_nn():
     training = td.TrainingData()
     training.set_tweet_training_data()
@@ -212,7 +242,6 @@ def train_nn():
     validationReviews = training.matrix_to_dense(validationReviews)
 
     trainingReviews = np.reshape(trainingReviews, (len(trainingReviews), trainingReviews.shape[2]))
-    validationReviews = np.reshape(validationReviews, (len(validationReviews), validationReviews.shape[2]))
 
     y_train = training.tweets_to_amazon_ratings(trainingRatings)
     y_val = training.tweets_to_amazon_ratings(validationRatings)
@@ -227,9 +256,27 @@ def train_nn():
         model.fit(trainingReviews, y_train, verbose=2,
                   epochs=10)
 
-        yp = model.predict(validationReviews)
+        yp = model.predict(y_val_max)
         yp_max = np.array([i.argmax(axis=0) for i in yp])
         print(classification_report(y_val_max, yp_max))
 
+def run_conv_on_1m():
+    # make this return tokenizer to use on test data
+    x_train, y_train, _, _, word_index, tokenizer = get_amazon_data_old()
+    #y_val_max = np.array([np.array(i).argmax(axis=0) for i in y_val])
+    model = build_cnn_model(word_index, len(y_train[0]))
+    x_train, y_train, word_index = get_amazon_data(tokenizer)
+
+    y_train_max = np.array([np.array(i).argmax(axis=0) for i in y_train])
+    yp = model.predict(x_train, verbose=1)
+
+    yp_max = np.array([i.argmax(axis=0) for i in yp])
+
+    print(classification_report(y_train_max, yp_max))
+    print(confusion_matrix(y_train_max, yp_max))
+    print("swag")
+
+
+
 if __name__ == '__main__':
-    train_nn()
+    run_conv_on_1m()

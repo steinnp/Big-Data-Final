@@ -24,6 +24,10 @@ class TrainingData:
         new_x = []
         new_y = []
         for i, x in enumerate(x_data):
+            #if i < 800000:
+             #   continue
+            #if i == 800001:
+             #   print("At review {}".format(i))
             if counts[int(y_data[i] - 1)] < chunk_size:
                 counts[int(y_data[i] - 1)] += 1
                 new_x.append(x)
@@ -39,10 +43,10 @@ class TrainingData:
         self.inputData = inputData
         self.outputData = outputData
     
-    def set_amazon_training_data(self):
+    def set_amazon_training_data(self, category_size=5000):
         inputData = open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_x_train_set.txt', 'r').readlines()
         outputData = [float(x.strip()) for x in open(r'C:\Users\steinnp\Desktop\KTH\Big-Data\dataset_for_class\dataset_for_class\2m_y_train_set.txt', 'r').readlines()]
-        inputData, outputData = self.get_uniform_distribution(inputData, outputData)
+        inputData, outputData = self.get_uniform_distribution(inputData, outputData, category_size)
         self.rawInputData = inputData
         self.inputData = self.__preprocessor.fit_transform(inputData)
         self.outputData = outputData

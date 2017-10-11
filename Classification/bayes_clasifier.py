@@ -2,7 +2,7 @@
 #importing the libraries
 import os, sys
 # get an absolute path to the directory that contains mypackage
-foo_dir = os.path.dirname(os.path.join(os.getcwd(), '/Users/yunuskocyigit/Desktop/KTH/Big Data in Media Technology/Big-Data-Final/Classification/bayes_clasifier.py'))
+foo_dir = os.path.dirname(os.path.join(os.getcwd(), __file__))
 sys.path.append(os.path.normpath(os.path.join(foo_dir, '../DataGathering', '..')))
 sys.path.append(os.path.normpath(os.path.join(foo_dir, '../Classification', '..')))
 sys.path.append(os.path.normpath(os.path.join(foo_dir, '../TextCleaning', '..')))
@@ -24,8 +24,8 @@ from sklearn import metrics
 training = td.TrainingData()
 training.set_tweet_training_data()
 trainingReviews, trainingRatings, validationReviews, validationRatings, train_raw, val_raw = training.get_training_validation_data(0.8)
-trainingRatings = td.tweets_to_amazon_ratings(trainingRatings)
-validationRatings = td.tweets_to_amazon_ratings(validationRatings)
+trainingRatings = training.tweets_to_amazon_ratings(trainingRatings)
+validationRatings = training.tweets_to_amazon_ratings(validationRatings)
 #importing the dataset
 #dataset = pd.read_csv('/Users/yunuskocyigit/Desktop/KTH/Big Data in Media Technology/projectfinal/tset1_20k_Trump.csv', names=['liked','txt'])
 #x = dataset.iloc[:, 1].values
