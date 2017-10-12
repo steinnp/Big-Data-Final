@@ -84,10 +84,10 @@ def plot_histogram(values, bars, xlabel, ylabel):
 
 	labels_range = [i for i in range(len(labels))]
 
-	ax.barh(labels_range, occurrences, align='center', color=colors)
-	ax.set_yticks(labels_range)
-	ax.set_yticklabels(labels)
-	ax.set_xlabel('Tweets')
+	ax.bar(labels_range, occurrences, color=colors)
+	ax.set_xticks(labels_range)
+	ax.set_xticklabels(labels)
+	ax.set_ylabel('Tweets')
 
 	plt.title("Classification")
 	plt.show()
